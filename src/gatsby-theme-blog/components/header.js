@@ -1,4 +1,5 @@
 import Bio from "./bio"
+import { LanguageDropdown, useLanguageDropdown } from "./language"
 
 import sun from "gatsby-theme-blog/assets/sun.png"
 import moon from "gatsby-theme-blog/assets/moon.png"
@@ -85,14 +86,29 @@ function makeColorModeToggle(colorMode, setColorMode) {
     )
 }
 
-export default ({ children, title, ...props }) => {
-    const blogThemeConfig = useBlogThemeConfig()
-    const { disableThemeUiStyling } = blogThemeConfig
+function makeLangDropdown(language, setLanguage) {
+    const selectLanguage = (langChoice) => {
+        setLanguage(langChoice.value)
+    }
+    return (
+        <LanguageDropdown
+            onChange={selectLanguage}
+            value={language}
+        />
+    )
+}
 
-    const [colorMode, setColorMode] = useColorMode()
+export default ({ children, title, ...props }) => {
+    const blogThemeConfig = useBlogThemeConfig();
+    const { disableThemeUiStyling } = blogThemeConfig;
+
+    const [colorMode, setColorMode] = useColorMode();
     const switchToggle = disableThemeUiStyling
         ? null
         : makeColorModeToggle(colorMode, setColorMode);
+
+    const [language, setLanguage] = useLanguageDropdown();
+    const langDropdown = makeLangDropdown(language, setLanguage);
     return (
         <header>
             <div
@@ -113,6 +129,7 @@ export default ({ children, title, ...props }) => {
                 >
                     <Title {...props}>{title}</Title>
                     {children}
+                    {langDropdown}
                     {switchToggle}
                 </div>
                 {props.location.pathname === rootPath && <Bio />}
