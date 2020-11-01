@@ -1,9 +1,11 @@
 import Bio from "./bio"
-import { LanguageDropdown, useLanguageDropdown } from "./language"
+
+import LanguageDropdown from "./language"
+import useLanguageDropdown from "../hooks/languageDropdown"
+import useBlogThemeConfig from "../hooks/configOptions"
 
 import sun from "gatsby-theme-blog/assets/sun.png"
 import moon from "gatsby-theme-blog/assets/moon.png"
-import useBlogThemeConfig from "gatsby-theme-blog/src/hooks/configOptions"
 import Switch from "gatsby-theme-blog/src/components/switch"
 
 import { css, useColorMode, Styled } from "theme-ui"
@@ -86,18 +88,6 @@ function makeColorModeToggle(colorMode, setColorMode) {
     )
 }
 
-function makeLangDropdown(language, setLanguage) {
-    const selectLanguage = (langChoice) => {
-        setLanguage(langChoice.value)
-    }
-    return (
-        <LanguageDropdown
-            onChange={selectLanguage}
-            value={language}
-        />
-    )
-}
-
 export default ({ children, title, ...props }) => {
     const blogThemeConfig = useBlogThemeConfig();
     const { disableThemeUiStyling } = blogThemeConfig;
@@ -107,8 +97,14 @@ export default ({ children, title, ...props }) => {
         ? null
         : makeColorModeToggle(colorMode, setColorMode);
 
-    const [language, setLanguage] = useLanguageDropdown();
-    const langDropdown = makeLangDropdown(language, setLanguage);
+    const [languageOption, setLanguageOption] = useLanguageDropdown();
+    const langDropdown = (
+        <LanguageDropdown
+            value={languageOption}
+            onChange={setLanguageOption}
+        />
+    );
+
     return (
         <header>
             <div

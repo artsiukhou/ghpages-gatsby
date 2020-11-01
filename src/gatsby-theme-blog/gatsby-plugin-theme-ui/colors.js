@@ -16,4 +16,4 @@ export default merge(defaultThemeColors, {
             highlight: lightBlue,
         },
     },
-})
+});
