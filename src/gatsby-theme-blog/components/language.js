@@ -25,7 +25,7 @@ const langStorage = {
 const LOCAL_STORAGE_LANG_KEY = "blog-lang";
 
 export function useLanguageDropdown() {
-    const [language, setLanguage] = React.useState(null);
+    const [language, setLanguage] = React.useState(DEFAULT_LANG);
     React.useEffect(() => {
         const lang = langStorage.get();
         if (!lang) {
