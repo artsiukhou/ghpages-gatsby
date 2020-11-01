@@ -1,43 +1,14 @@
-import localStorage from "../../local-storage/localStorage"
+import { SUPPORTED_LANG_OPTIONS, DEFAULT_OPTION } from "../../defaults/language"
 
 import React from "react"
-
 import ReactDropdown from "react-dropdown"
+
 
 export const LanguageDropdown = props => <ReactDropdown {...props} />
 
-const DEFAULT_LANG = "en"
+export default LanguageDropdown
 
 LanguageDropdown.defaultProps = {
-    options: ["ru", "en"],
-    value: DEFAULT_LANG,
-}
-
-const langStorage = {
-    get: () => {
-        return localStorage.get(LOCAL_STORAGE_LANG_KEY, DEFAULT_LANG);
-    },
-    set: (value) => {
-        return localStorage.set(LOCAL_STORAGE_LANG_KEY, value);
-    }
+    options: SUPPORTED_LANG_OPTIONS,
+    value: DEFAULT_OPTION,
 };
-
-const LOCAL_STORAGE_LANG_KEY = "blog-lang";
-
-export function useLanguageDropdown() {
-    const [language, setLanguage] = React.useState(DEFAULT_LANG);
-    React.useEffect(() => {
-        const lang = langStorage.get();
-        if (!lang) {
-            return;
-        }
-        setLanguage(lang);
-    }, [])
-    React.useEffect(() => {
-        if (!language) {
-            return;
-        }
-        langStorage.set(language);
-    }, [language])
-    return [language, setLanguage];
-}
