@@ -1,7 +1,6 @@
 import Bio from "./bio"
 
 import LanguageDropdown from "./language"
-import useLanguageDropdown from "../hooks/languageDropdown"
 import useBlogThemeConfig from "../hooks/configOptions"
 
 import sun from "gatsby-theme-blog/assets/sun.png"
@@ -97,14 +96,6 @@ export default ({ children, title, ...props }) => {
         ? null
         : makeColorModeToggle(colorMode, setColorMode);
 
-    const [languageOption, setLanguageOption] = useLanguageDropdown();
-    const langDropdown = (
-        <LanguageDropdown
-            value={languageOption}
-            onChange={setLanguageOption}
-        />
-    );
-
     return (
         <header>
             <div
@@ -125,7 +116,7 @@ export default ({ children, title, ...props }) => {
                 >
                     <Title {...props}>{title}</Title>
                     {children}
-                    {langDropdown}
+                    <LanguageDropdown {...props}/>
                     {switchToggle}
                 </div>
                 {props.location.pathname === rootPath && <Bio />}
