@@ -1,10 +1,8 @@
-import { SUPPORTED_LANG_OPTIONS } from "../../defaults/language"
+import { SUPPORTED_LANG_OPTIONS, DEFAULT_LANG_KEY, getLangOption } from "../../defaults/language"
 import { localStorage } from "../../local-storage/localStorage"
 
 import React from "react"
 import ReactDropdown from "react-dropdown"
-
-import { DEFAULT_LANG_KEY, getLangOption } from "../../defaults/language"
 
 const LOCAL_STORAGE_LANG_KEY = "blog-language";
 
