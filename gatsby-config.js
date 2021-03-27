@@ -1,5 +1,5 @@
 module.exports = {
-    pathPrefix: "/ghpages-gatsby",
+    pathPrefix: "",
     plugins: [
         {
             resolve: `gatsby-theme-blog`,
