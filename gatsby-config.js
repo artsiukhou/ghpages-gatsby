@@ -1,5 +1,5 @@
 module.exports = {
-    pathPrefix: "/ghpages-gatsby",
+    pathPrefix: "",
     plugins: [
         {
             resolve: `gatsby-theme-blog`,
@@ -18,7 +18,7 @@ module.exports = {
             },
             {
                 name: `github`,
-                url: `https://github.com/gatsbyjs`,
+                url: `https://github.com/artsiukhou`,
             },
         ],
     },
