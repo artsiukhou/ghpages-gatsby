@@ -1,6 +1,5 @@
 import Bio from "./bio"
 
-import LanguageDropdown from "./language"
 import useBlogThemeConfig from "../hooks/configOptions"
 
 import sun from "gatsby-theme-blog/assets/sun.png"
@@ -116,7 +115,6 @@ export default ({ children, title, ...props }) => {
                 >
                     <Title {...props}>{title}</Title>
                     {children}
-                    <LanguageDropdown {...props}/>
                     {switchToggle}
                 </div>
                 {props.location.pathname === rootPath && <Bio />}

@@ -9,13 +9,10 @@ module.exports = {
     // Customize your site metadata:
     siteMetadata: {
         title: `Be Best Dev`,
-//        author: `My Name`,
+        siteUrl: `https://www.bebest.dev`,
+        author: `Vova Artsiukhou`,
         description: `Let's learn!`,
         social: [
-            {
-                name: `twitter`,
-                url: `https://twitter.com/gatsbyjs`,
-            },
             {
                 name: `github`,
                 url: `https://github.com/artsiukhou`,
