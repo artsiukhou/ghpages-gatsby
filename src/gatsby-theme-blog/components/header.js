@@ -1,12 +1,6 @@
 import Bio from "./bio"
 
-import useBlogThemeConfig from "../hooks/configOptions"
-
-import sun from "gatsby-theme-blog/assets/sun.png"
-import moon from "gatsby-theme-blog/assets/moon.png"
-import Switch from "gatsby-theme-blog/src/components/switch"
-
-import { css, useColorMode, Styled } from "theme-ui"
+import { css, Styled } from "theme-ui"
 
 import { Link } from "gatsby"
 import React from "react"
@@ -54,47 +48,7 @@ const Title = ({ children, location }) => {
     )
 }
 
-function makeColorModeToggle(colorMode, setColorMode) {
-    function makeIcon(src, alt) {
-        const iconCss = [{ pointerEvents: `none`, margin: 4 }]
-        return (
-            <img
-                alt={alt}
-                src={src}
-                width="16"
-                height="16"
-                role="presentation"
-                css={iconCss}
-            />
-        )
-    }
-    const checkedIcon = makeIcon(moon, "moon indicating dark mode")
-    const uncheckedIcon = makeIcon(sun, "sun indicating light mode")
-
-    const isDark = colorMode === `dark`
-    const toggleColorMode = _ => {
-        setColorMode(isDark ? `light` : `dark`)
-    }
-    return (
-        <Switch
-            aria-label={`Toggle dark mode ${isDark ? `off` : `on`}`}
-            checkedIcon={checkedIcon}
-            uncheckedIcon={uncheckedIcon}
-            checked={isDark}
-            onChange={toggleColorMode}
-        />
-    )
-}
-
 export default ({ children, title, ...props }) => {
-    const blogThemeConfig = useBlogThemeConfig();
-    const { disableThemeUiStyling } = blogThemeConfig;
-
-    const [colorMode, setColorMode] = useColorMode();
-    const switchToggle = disableThemeUiStyling
-        ? null
-        : makeColorModeToggle(colorMode, setColorMode);
-
     return (
         <header>
             <div
@@ -115,7 +69,6 @@ export default ({ children, title, ...props }) => {
                 >
                     <Title {...props}>{title}</Title>
                     {children}
-                    {switchToggle}
                 </div>
                 {props.location.pathname === rootPath && <Bio />}
             </div>
