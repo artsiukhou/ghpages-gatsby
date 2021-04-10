@@ -3,7 +3,7 @@ import React from "react"
 export default function BioContent() {
     return (
         <>
-            Programming. Stories. Tips and tricks.
+            Programming. Thoughts and stories. Tips and tricks.
         </>
     )
 }
