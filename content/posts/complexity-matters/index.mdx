@@ -1,0 +1,111 @@
+---
+title: "Complexity Matters?"
+date: 2021-05-06
+tags: [programming, thoughts, complexity]
+---
+
+Today I want to share some quite random thoughts about _complexity_ and why it matters (or not?) with a real-life example I've faced at one of my jobs.
+
+But first, let's think about what is _complexity_? To put it simply, let's say it's `"how many operations an algorithm would perform in the worst-case scenario"`.
+Of course, _complexity_ topic could be quite... eh, complex (lol). Sometimes it's very difficult to calculate a good estimation of complexity. It also has
+various dimensions, it could be anything an algorithm can be limited by: IO (disk, network), memory, CPU etc. But typically an average
+software developer just needs to know (and care about) things like `hash_map has constant (in average) complexity on its operations` or `for-loop is linear`, right?
+
+Nowadays, with modern and very powerful computers people are thinking less and less about the complexity of an algorithm, and sometimes they are right:
+for a simple website, it doesn't matter what algorithm is used to sort all hundred and seven users by name or filter out all objects marked as "deleted".
+Or on UI you can simply call a server with a request "give me all the items of a user" and not think about chunking, pagination and whatnot. Modern browsers
+can handle even gigabytes of data!
+
+But whatever, I would be really surprised if someone will write their own `sort` when there are multiple _fast_ options available in the standard library
+of almost any programming language. Often people are using data structures and algorithms without even thinking about complexity, they just trying to solve their problems
+with some default blocks they have handy. That's not bad at all, we all know this quote about [premature optimisation](https://softwareengineering.stackexchange.com/questions/80084/is-premature-optimization-really-the-root-of-all-evil).
+But it's still important to _remember_ about complexity. When you think about complexity it's not _"yeah whatever let's just call string.replace()"_ anymore.
+It becomes _"I'll call string.replace(), but each invocation will lead to reallocations. So it will work for now, but with x10 amount of strings, I'll need to reconsider the algorithm"_.
+
+Ok, now it's time for a small exercise.
+
+It's the year 2015. Space X just launched and landed their rocket for the first time, and you just finished watching the stream. A product owner comes
+to your desk and asks you to add a simple feature to the service you're working on: implement a request which takes a list of users, and returns all the
+recent posts for each of the users. Quicker, quicker, this feature is expected to be in production _yesterday_! No time to think, and you already have two functions
+in your codebase which are fetching similar data, you can combine them easily, so in 10 minutes you're pushing to master something like this:
+
+```python
+# you had this function somewhere
+def fetch_post_data(post_id):
+    query = """
+    SELECT post_data FROM posts
+    WHERE post_id=%(post_id)s
+    LIMIT 1
+    """
+    return db.exec(query, {"post_id": post_id})
+
+# this one is old as well
+def fetch_post_ids(uuid):
+    query = """
+    SELECT post_id FROM user_post
+    WHERE uuid=%(uuid)s
+    ORDER BY post_id DESC
+    LIMIT 100
+    """
+    return db.exec(query, {"uuid": uuid})
+
+# so you came up with something like this
+def fetch_posts(uuid):
+    post_ids = fetch_post_ids(uuid)
+    return [
+        fetch_post_data(post_id)
+        for post_id in post_ids
+    ]
+
+
+def process_get_posts(request):
+    response = {}
+    for uuid in request.uuids:
+        response[uuid] = fetch_posts(uuid)
+    return response
+```
+
+All good, release is a great success, the product owner is happy, you got a promotion (ha-ha).
+
+The year 2021. The service is still up and running, it's still growing, it has changed few different owners, now it's the 5th team maintaining it.
+No one from the original authors is working in the company, no one in the new team knows all the corners of the service.
+
+But what they do know is that periodically at 4 am alerts are waking them up because of the amount of 500 errors returned by the service.
+They have dashboards and see some spikes in requests to the service, ending up in some enormous 400,000 queries-per-second numbers on the database size.
+Some days number is a bit lower (350,000-370,000) and there are no alerts, but roughly once per month, someone faces this issue.
+Ok, they even know the reason for that -- 4 am is a very good time to kick off some background processes as there is _almost_ no user load.
+So other services and scripts are fetching some data for their needs.
+
+They've checked the most popular request at 4 am (_~1 million_ hits per minute) -- no red flags. 2nd popular -- the same. 3rd -- nothing...
+They are starting to think that maybe the database is needed to be sharded. A cache is already here and it's quite big.
+
+One day someone almost randomly looks at _the 9th popular_ request (with _just 40,000_ hits per minute)... and finds out our good old `process_get_posts` function...
+WHAT?! Ok, let's calculate: the background script (quite old as well, no one looked at it either) is doing some chunking when calling `get_posts`.
+So no more than 1,000 UUIDs per request. But then each UUID can have 100 posts. So we generate `1,000 * (1 + 100)` queries to the database for a single request to the service!
+Yes, queries are not parallel, but each of them is processed within 2 milliseconds, so it's easily hundreds of queries-per-second. And having 40k of them...
+`40,000 RPS / 60s * (1s / 2ms) = 333,333 QPS`. Wow. They spend some more time on the code, modified it to fetch everything in a single query:
+
+```python
+def fetch_posts(uuids):
+    query = """
+    SELECT up.uuid, p.post_data FROM posts p
+    JOIN user_post up ON p.post_id=up.post_id
+    WHERE up.uuid IN %(uuids)s
+    ORDER BY p.post_id DESC
+    LIMIT 100
+    """
+    return db.exec(query, {"uuids": uuids})
+
+def process_get_posts(request):
+    response = fetch_posts(uuid)
+    return response
+```
+
+Is it better? It is worse? Well, it's a tricky question as the query itself is more massive and complex now, some analysis of the query plan
+is always a good thing to do. In our case, it was better because it resolved a long-running issue, which was triggered because of the _amount_
+of queries as they exhausted the database's worker-thread-pool. After the fix, the largest spike during the day became 15,000 QPS.
+
+What can I say? Know your codebase. Invest into the tooling to observe your system: have better metrics and logs, dashboards and alerts.
+Know your bottlenecks. Remember about complexity. And periodically revisit the system you have: sometimes you will cut some corners,
+but you will most likely need to address these issues in a long run. I'm pretty sure that the original authors of this code know everything I've mentioned here,
+but as it was not an issue from the beginning this code was alive for quite a decent amount of time.
