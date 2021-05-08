@@ -9,7 +9,7 @@ Today I want to share some quite random thoughts about _complexity_ and why it m
 But first, let's think about what is _complexity_? To put it simply, let's say it's `"how many operations an algorithm would perform in the worst-case scenario"`.
 Of course, _complexity_ topic could be quite... eh, complex (lol). Sometimes it's very difficult to calculate a good estimation of complexity. It also has
 various dimensions, it could be anything an algorithm can be limited by: IO (disk, network), memory, CPU etc. But typically an average
-software developer just needs to know (and care about) things like `hash_map has constant (in average) complexity on its operations` or `for-loop is linear`, right?
+software developer just needs to know (and care about) things like `hash_map has constant (on average) complexity on its operations` or `for-loop is linear`, right?
 
 Nowadays, with modern and very powerful computers people are thinking less and less about the complexity of an algorithm, and sometimes they are right:
 for a simple website, it doesn't matter what algorithm is used to sort all hundred and seven users by name or filter out all objects marked as "deleted".
@@ -88,8 +88,8 @@ Yes, queries are not parallel, but each of them is processed within 2 millisecon
 ```python
 def fetch_posts(uuids):
     query = """
-    SELECT up.uuid, p.post_data FROM posts p
-    JOIN user_post up ON p.post_id=up.post_id
+    SELECT up.uuid, p.post_data FROM user_post up
+    JOIN posts p ON p.post_id=up.post_id
     WHERE up.uuid IN %(uuids)s
     ORDER BY p.post_id DESC
     LIMIT 100
